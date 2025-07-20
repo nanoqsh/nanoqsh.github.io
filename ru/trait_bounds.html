@@ -1,0 +1,172 @@
+<!DOCTYPE html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400;1,700&amp;family=JetBrains+Mono:wght@100..800&amp;display=swap" rel="stylesheet"><link rel="stylesheet" href="../style.css"><title>Какой-то заголовок!</title></head><body><style>.deferred {
+    opacity: 0;
+}
+
+.show {
+    transition: opacity 0.2s ease;
+}</style><script>window.onload = () => {
+    for (const el of document.querySelectorAll('.deferred')) {
+        el.classList.remove('deferred')
+    }
+}</script><header class="content deferred show"><h1>Какой-то заголовок!</h1><div class="hor"><div class="date">4 июл 2025</div><div class="hor"><a class="hor button" href="../en/trait_bounds.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4,2H20A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H16L12,22L8,18H4A2,2 0 0,1 2,16V4A2,2 0 0,1 4,2M4,4V16H8.83L12,19.17L15.17,16H20V4H4M6,7H18V9H6V7M6,11H16V13H6V11Z" /></svg>en</a></div></div></header><article class="content deferred show"><p>Золотое правило любых интерфейсов в широком смысле и, в частности, трейтов в Rust, это не требовать больше, чем необходимо. Иногда я встречаю код где это правило нарушается. В этой статье я подробно опишу примеры такого кода, какие проблемы влечёт такой подход и как это исправить. Также разберу примеры где это правило не является абсолютным и где наоборот его полезно нарушить.</p><p>Хорошо, давайте представим что перед нами стоит задача написать тип-итератор, который будет печатать каждый свой элемент в консоль. В этом типе нет большого практического смысла, так что воспринимайте его просто как иллюстрацию. Итак, тип оборачивает какой-то существующий итератор, поэтому нам понадобится женерик для внутреннего типа итератора, пусть это будет что-то вроде <code class="inline">I: Iterator</code>. Также мы хотим печатать его элементы, поэтому нам будет нужна реализация трейта <code class="inline">Display</code> для элементов итератора. В итоге тип можно объявить как-то так</p><pre><code><span class="kw">use</span> <span class="id">std</span>::<span class="id">fmt</span>::<span class="ty">Display</span>;
+
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ty">Printer</span>&lt;<span class="ge">I</span>&gt;
+<span class="kw">where</span>
+    <span class="ge">I</span>: <span class="ty">Iterator</span>&lt;<span class="ty">Item</span>: <span class="ty">Display</span>&gt;,
+{
+    <span class="id">iter</span>: <span class="ge">I</span>,
+}
+</code></pre><p>Отлично, давайте сразу реализуем <code class="inline">Iterator</code></p><pre><code><span class="kw">impl</span>&lt;<span class="ge">I</span>&gt; <span class="ty">Iterator</span> <span class="kw">for</span> <span class="ty">Printer</span>&lt;<span class="ge">I</span>&gt;
+<span class="kw">where</span>
+    <span class="ge">I</span>: <span class="ty">Iterator</span>&lt;<span class="ty">Item</span>: <span class="ty">Display</span>&gt;,
+{
+    <span class="kw">type</span> <span class="ty">Item</span> = <span class="ge">I</span>::<span class="ty">Item</span>;
+
+    <span class="kw">fn</span> <span class="id">next</span>(&amp;<span class="kw">mut</span> <span class="kw">self</span>) -&gt; <span class="ty">Option</span>&lt;<span class="kw">Self</span>::<span class="ty">Item</span>&gt; {
+        <span class="kw">let</span> <span class="id">item</span> = <span class="kw">self</span>.<span class="id">iter</span>.<span class="id">next</span>()?;
+        <span class="id">println</span>!(<span class="li">&quot;{item}&quot;</span>);
+        <span class="ty">Some</span>(<span class="id">item</span>)
+    }
+}
+</code></pre><p>Мы не хотим чтобы пользователь нашего API мог напрямую дёргать поле <code class="inline">iter</code>, пусть оно будет приватным. А для создания нового экземпляра нашего типа добавим конструктор. Также добавим метод <code class="inline">into_inner</code> если пользователю понадобится вернуть свой итератор обратно</p><pre><code><span class="kw">impl</span>&lt;<span class="ge">I</span>&gt; <span class="ty">Printer</span>&lt;<span class="ge">I</span>&gt;
+<span class="kw">where</span>
+    <span class="ge">I</span>: <span class="ty">Iterator</span>&lt;<span class="ty">Item</span>: <span class="ty">Display</span>&gt;,
+{
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="id">new</span>(<span class="id">iter</span>: <span class="ge">I</span>) -&gt; <span class="kw">Self</span> {
+        <span class="kw">Self</span> { <span class="id">iter</span> }
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="id">into_inner</span>(<span class="kw">self</span>) -&gt; <span class="ge">I</span> {
+        <span class="kw">self</span>.<span class="id">iter</span>
+    }
+}
+</code></pre><p>Давайте также реализуем парочку полезных трейтов, раз уж мы пишем что-то вроде библиотеки. Например, вдруг пользователю понадобится склонировать значение нашего типа? Давайте реализуем <code class="inline">Clone</code>, только я сделаю это явно, а не через <code class="inline">derive</code>, исключительно в иллюстративных целях. Само собой, чтобы склонировать содержимое потребуем от него реализацию трейта <code class="inline">Clone</code></p><pre><code><span class="kw">impl</span>&lt;<span class="ge">I</span>&gt; <span class="ty">Clone</span> <span class="kw">for</span> <span class="ty">Printer</span>&lt;<span class="ge">I</span>&gt;
+<span class="kw">where</span>
+    <span class="ge">I</span>: <span class="ty">Iterator</span>&lt;<span class="ty">Item</span>: <span class="ty">Display</span>&gt; + <span class="ty">Clone</span>,
+{
+    <span class="kw">fn</span> <span class="id">clone</span>(&amp;<span class="kw">self</span>) -&gt; <span class="kw">Self</span> {
+        <span class="kw">Self</span> {
+            <span class="id">iter</span>: <span class="kw">self</span>.<span class="id">iter</span>.<span class="id">clone</span>(),
+        }
+    }
+}
+</code></pre><p>Что же, на первый взгляд всё кажется логичным, но уже на этом этапе можно увидеть проблемы такого подхода. Любой <code class="inline">impl</code> который касается нашего типа <code class="inline">Printer</code> неизбежно требует <code class="inline">I: Iterator&lt;Item: Display&gt;</code>. Если убрать это ограничение код перестанет компилироваться. Как минимум это загрязнет код ненужными подробностями. Зачем нам требовать <code class="inline">I: Iterator&lt;Item: Display&gt;</code> просто чтобы склонировать значение типа? Более того, зачем нам требовать реализацию итератора для методов <code class="inline">new</code> или <code class="inline">into_inner</code>? Технически, ничего не мешает нам сконструировать <code class="inline">Printer</code> с любым типом. Тем более в реализации метода <code class="inline">into_inner</code> нам нужно просто вытащить значение, с ним не нужно больше ничего делать, не нужно итерироваться и тем более не нужно печатать отдельные элементы.</p><p>Код нашей библиотеки становится сложнее на пустом месте. Более того, все эти сигнатуры будут видны в документации крейта, даже если пользователь не будет читать исходный код, он всё равно будет думать про ограничения там, где они не нужны. Уже только это стоит того, чтобы убрать ограничения у всех <code class="inline">impl</code>-ов, кроме разве что у <code class="inline">impl&lt;I&gt; Iterator for Printer&lt;I&gt;</code> иначе мы просто не сможем реализовать задуманное. Тем более никакие ограничения не нужны у объявления структуры. При создании <code class="inline">struct</code> или <code class="inline">enum</code> мы описываем исключительно данные, в отличии от функций (или методов) в структурах вообще нет никакого кода. Мы практически никак не сможем использовать факт того, что обобщенный параметр это итератор или какой-то ещё трейт. Разве что в довольно исключительных случаях, хороший пример тип <a href="https://doc.rust-lang.org/std/iter/struct.Peekable.html" target="_blank"><code class="inline">Peekable</code></a> из std. Обратите внимание на то, что он требует <code class="inline">I: Iterator</code> у самого типа и как следствие у всех методов и реализаций трейтов. Зачем это нужно? Давайте откроем исходный код и посмотрим как именно данный тип объявлен</p><pre><code><span class="kw">pub</span> <span class="kw">struct</span> <span class="ty">Peekable</span>&lt;<span class="ge">I</span>&gt;
+<span class="kw">where</span>
+    <span class="ge">I</span>: <span class="ty">Iterator</span>,
+{
+    <span class="id">iter</span>: <span class="ge">I</span>,
+    <span class="cm">/// Remember a peeked value, even if it was None.
+</span>    <span class="id">peeked</span>: <span class="ty">Option</span>&lt;<span class="ty">Option</span>&lt;<span class="ge">I</span>::<span class="ty">Item</span>&gt;&gt;,
+}
+</code></pre><p>Тут раскрывается предназначение типа <code class="inline">Peekable</code> - это итератор, который может заглядывать на один элемент вперёд. Чтобы это работало нужно где-то сохранять элемент. Какой будет тип у этого элемента? Разумеется <code class="inline">I::Item</code> из трейта итератора, но тогда нам придётся потребовать чтобы <code class="inline">I</code> реализовывал трейт <code class="inline">Iterator</code>, иначе откуда взять <code class="inline">Item</code>? В данном случае ограничение трейта полностью оправданно. Но что касается нашего гипотетического типа <code class="inline">Printer</code>? Как мы выяснили навешивать ограничение на женерик вовсе необязательно, давайте упростим определение типа</p><pre><code><span class="kw">pub</span> <span class="kw">struct</span> <span class="ty">Printer</span>&lt;<span class="ge">I</span>&gt; {
+    <span class="id">iter</span>: <span class="ge">I</span>,
+}
+</code></pre><p>Но что касается <code class="inline">impl</code>-ов, нужны ли ограничения там? Да и в целом, вся суть нашего типа <code class="inline">Printer</code> в том, чтобы быть итератором. Без этого ограничения тип не имеет смысла, так может стоит указать требование <code class="inline">I: Iterator&lt;Item: Display&gt;</code> хотя бы для наглядности? Пусть это загрязнит код библиотеки, зато сразу будет видно намерение для чего этот тип используется? В конце концов, пусть я как автор библиотеки напишу по-больше кода, зато пользователю будет проще работать с моим типом. Например, что если пользователь создаст значение <code class="inline">Printer</code>-а внутри которого будет не итератор, ведь будет лучше если он получит ошибку заранее, чем только тогда, когда попытается непосредственно воспользоваться итератором.</p><p>Что же, в какой-то степени я могу согласиться с таким ходом рассуждений. Иногда действительно лучше потребовать необходимой реализации как можно раньше. Например, пользователь может конструировать какой-то сложный составной итератор, применяя кучу разных адаптеров, но вдруг окажется что итоговый тип не реализует итератор потому что одна из составных частей его не реализует. Представьте что я написал такой код</p><pre><code><span class="kw">let</span> <span class="id">n</span> = (<span class="li">0</span>..<span class="li">6</span>).<span class="id">map</span>(<span class="li">&quot;?&quot;</span>).<span class="id">count</span>();
+</code></pre><p>Я не смогу скомпилировать этот код, так как чтобы вызвать <code class="inline">count</code>, нужно чтобы <code class="inline">self</code> был итератором. Что тут не так? Если бы метод <code class="inline">map</code> никак не проверял нужные ограничения, а просто конструировал свой адаптер, то при вызове <code class="inline">count</code> я получил бы такое сообщение</p><pre><code>error[E0599]: the method `count` exists for struct `Map&lt;Range&lt;{integer}&gt;, &amp;str&gt;`, but its trait bounds were not satisfied
+  --&gt; src/main.rs:2:29
+   |
+2  |     let n = (0..6).map(&quot;?&quot;).count();
+   |                             ^^^^^ method cannot be called on `Map&lt;Range&lt;{integer}&gt;, &amp;str&gt;` due to unsatisfied trait bounds
+   |
+  ::: /home/nano/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/adapters/map.rs:61:1
+   |
+61 | pub struct Map&lt;I, F&gt; {
+   | -------------------- doesn't satisfy `Map&lt;std::ops::Range&lt;{integer}&gt;, &amp;str&gt;: Iterator`
+   |
+   = note: the following trait bounds were not satisfied:
+           `&lt;&amp;str as FnOnce&lt;({integer},)&gt;&gt;::Output = _`
+           which is required by `Map&lt;std::ops::Range&lt;{integer}&gt;, &amp;str&gt;: Iterator`
+           `&amp;str: FnMut&lt;({integer},)&gt;`
+           which is required by `Map&lt;std::ops::Range&lt;{integer}&gt;, &amp;str&gt;: Iterator`
+           `Map&lt;std::ops::Range&lt;{integer}&gt;, &amp;str&gt;: Iterator`
+           which is required by `&amp;mut Map&lt;std::ops::Range&lt;{integer}&gt;, &amp;str&gt;: Iterator`
+</code></pre><p>Благо данный пример довольно простой я всё же могу вычленить изначальную причину проблемы, а именно строку <code class="inline">which is required by 'Map&lt;std::ops::Range&lt;{integer}&gt;, &amp;str&gt;: Iterator' '&amp;str: FnMut&lt;({integer},)&gt;'</code> где я увижу что <code class="inline">&amp;str</code> не реализует трейт <code class="inline">FnMut</code>. Но это всё равно слишком сложно и будет тем сложнее, чем сложнее сам итератор который я составляю. В какой-то момент ошибка станет совершенно нечитаемой и я не смогу разобраться в чём заключается проблема.</p><p>К счастью метод <code class="inline">map</code> у итератора накладывает необходимые ограничения заранее и прежде чем получить ошибку выше, я увижу это</p><pre><code>error[E0277]: expected a `FnMut({integer})` closure, found `&amp;str`
+   --&gt; src/main.rs:2:24
+    |
+2   |     let n = (0..6).map(&quot;?&quot;).count();
+    |                    --- ^^^ expected an `FnMut({integer})` closure, found `&amp;str`
+    |                    |
+    |                    required by a bound introduced by this call
+    |
+    = help: the trait `Fn({integer})` is not implemented for `str`
+    = note: required for `&amp;str` to implement `FnMut({integer})`
+note: required by a bound in `map`
+   --&gt; /home/nano/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/iter/traits/iterator.rs:748:12
+    |
+745 |     fn map&lt;B, F&gt;(self, f: F) -&gt; Map&lt;Self, F&gt;
+    |        --- required by a bound in this associated function
+...
+748 |         F: FnMut(Self::Item) -&gt; B,
+    |            ^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `Iterator::map`
+</code></pre><p>Уже намного понятнее: <code class="inline">&amp;str</code> не реализует <code class="inline">FnMut</code> о чём написано в самом начале лога ошибки. Сам <code class="inline">map</code> реализован так</p><pre><code><span class="kw">pub</span> <span class="kw">trait</span> <span class="ty">Iterator</span> {
+    <span class="cm">/**/</span>
+
+    <span class="kw">fn</span> <span class="id">map</span>&lt;<span class="ge">B</span>, <span class="ge">F</span>&gt;(<span class="kw">self</span>, <span class="id">f</span>: <span class="ge">F</span>) -&gt; <span class="ty">Map</span>&lt;<span class="kw">Self</span>, <span class="ge">F</span>&gt;
+    <span class="kw">where</span>
+        <span class="kw">Self</span>: <span class="ty">Sized</span>,
+        <span class="ge">F</span>: <span class="ty">FnMut</span>(<span class="kw">Self</span>::<span class="ty">Item</span>) -&gt; <span class="ge">B</span>,
+    {
+        <span class="ty">Map</span>::<span class="id">new</span>(<span class="kw">self</span>, <span class="id">f</span>)
+    }
+
+    <span class="cm">/**/</span>
+}
+</code></pre><p>Этот пример отлично показывает в каких случаях полезно отойти от правила минимального итерфейса и потребовать большего там, где технически это не является необходимым. Давайте вернёмся к нашему примеру, что там с <code class="inline">impl</code> методов? Ради понятных сообщений об ошибках, не было бы разумно оставить ограничение <code class="inline">I: Iterator&lt;Item: Display&gt;</code>? Вообщем-то, да, но только для конструктора. Я предлагаю написать <code class="inline">impl</code> методов так</p><pre><code><span class="kw">impl</span>&lt;<span class="ge">I</span>&gt; <span class="ty">Printer</span>&lt;<span class="ge">I</span>&gt; {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="id">new</span>(<span class="id">iter</span>: <span class="ge">I</span>) -&gt; <span class="kw">Self</span>
+    <span class="kw">where</span>
+        <span class="ge">I</span>: <span class="ty">Iterator</span>&lt;<span class="ty">Item</span>: <span class="ty">Display</span>&gt;,
+    {
+        <span class="kw">Self</span> { <span class="id">iter</span> }
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="id">into_inner</span>(<span class="kw">self</span>) -&gt; <span class="ge">I</span> {
+        <span class="kw">self</span>.<span class="id">iter</span>
+    }
+}
+</code></pre><p>Это хороший компромис, теперь мы не требуем сильно много там где это не нужно, но и заранее предупреждаем пользователя, что создавать значение типа имеет смысл только если <code class="inline">I</code> это итератор, причём не просто какой-то, а такой что <code class="inline">Item: Display</code>. При этом, если значение уже создано, ничего не мешает вызвать у него <code class="inline">into_inner</code>. Это сделает пользовательский код проще в некоторых местах, например, что если пользователь напишет такую функцию?</p><pre><code><span class="kw">fn</span> <span class="id">debug_inner</span>&lt;<span class="ge">I</span>&gt;(<span class="id">printer</span>: <span class="ty">Printer</span>&lt;<span class="ge">I</span>&gt;)
+<span class="kw">where</span>
+    <span class="ge">I</span>: <span class="ty">Debug</span>,
+{
+    <span class="id">println</span>!(<span class="li">&quot;{:?}&quot;</span>, <span class="id">printer</span>.<span class="id">into_inner</span>());
+}
+</code></pre><p>Тут пользовательский код требует ровно то что необходимо, а именно <code class="inline">Debug</code> для inner значения и всё. В более ранней версии с ненужными ограничениями пришлось бы писать так</p><pre><code><span class="kw">fn</span> <span class="id">debug_inner</span>&lt;<span class="ge">I</span>&gt;(<span class="id">printer</span>: <span class="ty">Printer</span>&lt;<span class="ge">I</span>&gt;)
+<span class="kw">where</span>
+    <span class="ge">I</span>: <span class="ty">Iterator</span>&lt;<span class="ty">Item</span>: <span class="ty">Display</span>&gt; + <span class="ty">Debug</span>,
+{<span class="cm">/**/</span>}
+</code></pre><p>Хотя ни итерация, ни принт элементов этого итератора никак не используется. Лишние ограничения в данном случае только запутывают, делая код не просто комплекснее, но и более трудным для восприятия, ведь как только видишь подобную сигнатуру, ожидаешь, что где-то тут будет использоваться итерации и принт элементов, но этого не происходит.</p><p>Ещё один вариант использования: что если у типа вообще не вызываются никакие методы? Что если пользователь просто хочет содержать значения нашего типа в какой-то другой структуре?</p><pre><code><span class="kw">use</span> <span class="id">std</span>::<span class="id">collections</span>::<span class="ty">HashMap</span>;
+
+<span class="kw">fn</span> <span class="id">check_key_hello</span>&lt;<span class="ge">I</span>&gt;(<span class="id">m</span>: &amp;<span class="ty">HashMap</span>&lt;&amp;<span class="ty">str</span>, <span class="ty">Printer</span>&lt;<span class="ge">I</span>&gt;&gt;) -&gt; <span class="ty">bool</span> {
+    <span class="id">m</span>.<span class="id">contains_key</span>(<span class="li">&quot;hello&quot;</span>)
+}
+</code></pre><p>Не будь ограничения минимальны, а вместо этого были бы добавлены на всю структуру, тут потребовалось бы также уточнять <code class="inline">I: Iterator&lt;Item: Display&gt;</code>, хотя в этом нет никакого смысла. Опять же <code class="inline">HashMap</code> тут скорее для примера, вместо него может быть, например, какой-то пользовательский тип который содержит <code class="inline">Printer&lt;I&gt;</code> как поле или что угодно. Так или иначе, потенциально существует много кода, который не использует типы по их прямому назначению, а вместо этого как-то работает с ними опосредованно.</p><p>Теперь рассмотрим такой пользовательский код</p><pre><code><span class="kw">fn</span> <span class="id">make_boxed_printer</span>&lt;<span class="ge">I</span>&gt;(<span class="id">iter</span>: <span class="ge">I</span>) -&gt; <span class="ty">Box</span>&lt;<span class="ty">Printer</span>&lt;<span class="ge">I</span>&gt;&gt;
+<span class="kw">where</span>
+    <span class="ge">I</span>: <span class="ty">Iterator</span>&lt;<span class="ty">Item</span>: <span class="ty">Display</span>&gt;,
+{
+    <span class="ty">Box</span>::<span class="id">new</span>(<span class="ty">Printer</span>::<span class="id">new</span>(<span class="id">iter</span>))
+}
+</code></pre><p>Нужен ли тут <code class="inline">I: Iterator&lt;Item: Display&gt;</code>? Технически, чтобы код скомпилировался - нет. Но ранее мы решили что требовать реализацию итератора на конструкторе <code class="inline">new</code> может быть полезно. В этой статье я рассматриваю чисто синтетический пример, какой-то однозначной рекомендации как лучше я дать не могу. Всё зависит от предметной области и от конкретных типов, от того какую именно задачу они решают, от того как используется ваш крейт - что если он лишь деталь реализации более высоко-уровневого крейта который вы сами же и поддерживаете, зачем усложнять код в этом случае? В конечном счёте всё упирается в дизайн API, я лишь призываю думать об этом. Для библиотечного кода это очень важно, хотя проблема загрязнения и усложнения кода может проявлятся и при написании куда более локального кода. В общем случае я предпочитаю подход минималистичного кода, когда нет технически необязательных для компиляции строк.</p><p>Надеюсь я смог показать сомнительность подобного кода</p><pre><code><span class="kw">struct</span> <span class="ty">Foo</span>&lt;<span class="ge">T</span>&gt;(<span class="ty">Vec</span>&lt;<span class="ge">T</span>&gt;)
+<span class="kw">where</span>
+    <span class="ge">T</span>: <span class="ty">Display</span>;
+</code></pre><p>Ну а тем более, если вы видите что-то такое</p><pre><code><span class="kw">struct</span> <span class="ty">Foo</span>&lt;<span class="ge">T</span>&gt;(<span class="ty">Vec</span>&lt;<span class="ge">T</span>&gt;)
+<span class="kw">where</span>
+    <span class="ge">T</span>: <span class="ty">Clone</span> + <span class="ty">Display</span> + <span class="ty">Debug</span> + <span class="ty">PartialEq</span> + <span class="ty">Eq</span> + <span class="ty">Send</span> + <span class="ty">Sync</span>;
+</code></pre><p>То явно с кодом что-то не так и его можно значительно упростить. Аналогично, если вы видите что-то такое</p><pre><code><span class="kw">trait</span> <span class="ty">Foo</span>: <span class="ty">Clone</span> + <span class="ty">Display</span> + <span class="ty">Debug</span> + <span class="ty">PartialEq</span> + <span class="ty">Eq</span> + <span class="ty">Send</span> + <span class="ty">Sync</span> {<span class="cm">/**/</span>}
+</code></pre><p>Также стоит задуматься, а обязательно требовать тут все эти ограничения, даже если все они &quot;нужны&quot; и в конечном счете используются в реализациях. Опять же однозначного решения тут нет, иногда такой подход может наоборот упростить кучу кода (например что если нам нужно что-то вроде алиаса для трейта), но я всё равно относился бы к подобному коду с большой настороженностью.</p><p>В общем случае подход минимального интерфейса довольно прост. Не пишите того, что не нужно. Постарайтесь не копипастить ограничения трейтов из сигнатуры в сигнатуру, а вместо этого опишите только те, что реально необходимы для конкретной реализации. Меняя реализацию пересмотрите требования, возможно какие-то трейты уже не нужны. Попробуйте удалить какое-то ограничение и посмотрите приводит ли это к ошибке компиляции. По возможности локализуйте ограничения, вместо такого</p><pre><code><span class="kw">impl</span>&lt;<span class="ge">T</span>&gt; <span class="ty">Foo</span>&lt;<span class="ge">T</span>&gt;
+<span class="kw">where</span>
+    <span class="ge">T</span>: <span class="ty">Clone</span> + <span class="ty">Display</span> + <span class="ty">Debug</span> + <span class="ty">PartialEq</span> + <span class="ty">Eq</span> + <span class="ty">Send</span> + <span class="ty">Sync</span>,
+{
+    <span class="kw">fn</span> <span class="id">foo</span>(&amp;<span class="kw">self</span>) {<span class="cm">/**/</span>}
+    <span class="kw">fn</span> <span class="id">bar</span>(&amp;<span class="kw">self</span>) {<span class="cm">/**/</span>}
+}
+</code></pre><p>Описывайте требования более точно</p><pre><code><span class="kw">impl</span>&lt;<span class="ge">T</span>&gt; <span class="ty">Foo</span>&lt;<span class="ge">T</span>&gt; {
+    <span class="kw">fn</span> <span class="id">foo</span>(&amp;<span class="kw">self</span>)
+    <span class="kw">where</span>
+        <span class="ge">T</span>: <span class="ty">Clone</span> + <span class="ty">Display</span>,
+    {<span class="cm">/**/</span>}
+
+    <span class="kw">fn</span> <span class="id">bar</span>(&amp;<span class="kw">self</span>)
+    <span class="kw">where</span>
+        <span class="ge">T</span>: <span class="ty">Eq</span>,
+    {<span class="cm">/**/</span>}
+}
+</code></pre></article><footer class="deferred show"><div class="socials"><a class="icon" href="https://github.com/nanoqsh" aria-label="GitHub" target="_blank"><svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></a><a class="icon" href="https://x.com/nanoqsh" aria-label="Twitter" target="_blank"><svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>X</title><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg></a><a class="icon" href="https://discord.com/users/589014218498375680" aria-label="Discord" target="_blank"><svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Discord</title><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg></a></div></footer></body>

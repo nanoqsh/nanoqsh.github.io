@@ -1,4 +1,4 @@
-<!DOCTYPE html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="icon" href="../favicon.svg"><link rel="manifest" href="../manifest.json"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&amp;family=Carlito:ital,wght@0,400;0,700;1,400;1,700&amp;family=JetBrains+Mono:wght@100..800&amp;display=swap" rel="stylesheet"><link rel="stylesheet" href="../style.css"><title>Minimal Trait Bounds: Why and How?</title></head><body><style>.deferred {
+<!DOCTYPE html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#282726"><link rel="icon" href="../favicon.svg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&amp;family=Carlito:ital,wght@0,400;0,700;1,400;1,700&amp;family=JetBrains+Mono:wght@100..800&amp;display=swap" rel="stylesheet"><link rel="stylesheet" href="../style.css"><title>Minimal Trait Bounds: Why and How?</title></head><body><style>.deferred {
     opacity: 0;
 }
 
@@ -125,7 +125,7 @@ note: required by a bound in `map`
 </code></pre><p>It is clear here that the method signature requires <code class="inline">F: FnMut(Self::Item) -&gt; B</code> for the function parameter. Although, in fact, a <code class="inline">Map</code> value can be constructed without this constraint. This example clearly shows in which cases it is useful to deviate from the minimal interface rule and require more, even when it is <em>technically</em> not necessary</p><p>Let's return to our example. To provide clearer error messages, it would make sense to leave the constraint <code class="inline">I: Iterator&lt;Item: Display&gt;</code> - but only on the constructor</p><p>The most optimal solution for our public API would be the following <code class="inline">impl</code>:</p><pre><code><span class="kw">impl</span>&lt;<span class="ge">I</span>&gt; <span class="ty">Printer</span>&lt;<span class="ge">I</span>&gt; {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="id">new</span>(<span class="id">iter</span>: <span class="ge">I</span>) -&gt; <span class="kw">Self</span>
     <span class="kw">where</span>
-        <span class="cm">// Ограничение только тут
+        <span class="cm">// The restriction is only here
 </span>        <span class="ge">I</span>: <span class="ty">Iterator</span>&lt;<span class="ty">Item</span>: <span class="ty">Display</span>&gt;,
     {
         <span class="kw">Self</span> { <span class="id">iter</span> }
