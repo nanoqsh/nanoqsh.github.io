@@ -1,0 +1,288 @@
+:root {
+    --fg: #d4be98;
+    --bg: #282726;
+    --hi: #d8a657;
+    --bgcode: #202020;
+    --kw: #ea6962;
+    --li: #a9b665;
+    --ty: #7daea3;
+    --ge: #89b482;
+    --id: #e5d1a4;
+    --mc: #89b482;
+    --lt: #89b482;
+    --cm: #928374;
+    --code: #caaf7f;
+    --border: 4px;
+    --pad: 1.5rem;
+    --content-width: 870px;
+    --button-height: 30px;
+}
+
+::selection {
+    color: var(--bg);
+    background: var(--hi);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--bg);
+    color: var(--fg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Carlito', sans-serif;
+    font-size: 18px;
+}
+
+.blog-title,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: var(--pad) 0;
+}
+
+.blog-title {
+    padding: var(--pad) 0;
+    font-family: 'Alfa Slab One', serif;
+    font-size: 3.4rem;
+    font-weight: normal;
+    text-shadow: 5px 10px 0px var(--bgcode);
+    user-select: none;
+}
+
+h1 {
+    font-size: 2.3rem;
+}
+
+h2 {
+    font-size: 1.8rem;
+}
+
+h3 {
+    font-size: 1.3rem;
+}
+
+h4 {
+    font-size: 1rem;
+}
+
+h5 {
+    font-size: 0.6rem;
+}
+
+h6 {
+    font-size: 0.3rem;
+}
+
+.title {
+    margin-top: 0.8rem !important;
+    text-align: left;
+}
+
+.hor {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.button {
+    margin-left: calc(var(--pad) / 2);
+    padding: 0 0.8rem;
+    background: var(--bgcode);
+    color: var(--fg);
+    border-radius: calc(var(--button-height) / 2);
+    font-size: 1.2rem;
+    line-height: var(--button-height);
+    height: var(--button-height);
+    cursor: pointer;
+    text-decoration: none !important;
+    user-select: none;
+}
+
+.button:hover {
+    color: var(--li);
+}
+
+.button svg {
+    margin-right: 6px;
+    width: 20px;
+    height: 20px;
+    fill: var(--fg);
+    transition: fill 0.2s ease;
+}
+
+.button:hover svg {
+    fill: var(--li);
+}
+
+.content {
+    width: 100%;
+    max-width: var(--content-width);
+}
+
+@media (max-width: 870px) {
+    .content>* {
+        padding-left: calc(var(--pad) / 2);
+        padding-right: calc(var(--pad) / 2);
+    }
+
+    .content>pre {
+        padding: var(--pad);
+        border-radius: 0;
+    }
+}
+
+header {
+    font-weight: bold;
+    width: 100%;
+    text-align: center;
+}
+
+.date {
+    line-height: var(--button-height);
+    height: var(--button-height);
+    font-size: 1.2rem;
+    color: var(--code);
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    user-select: none;
+}
+
+.date svg {
+    margin-left: 6px;
+    width: 20px;
+    height: 20px;
+    fill: var(--code);
+    transition: fill 0.2s ease;
+}
+
+article pre {
+    padding: var(--pad);
+    overflow: scroll;
+    background: var(--bgcode);
+    border-radius: var(--border);
+    text-wrap: wrap;
+}
+
+article p {
+    margin: var(--pad) 0;
+    line-height: 1.5rem;
+}
+
+article img {
+    width: 100%;
+    max-width: var(--content-width);
+    border-radius: var(--border);
+}
+
+article ul {
+    margin: var(--pad) 0;
+    line-height: 1.5rem;
+}
+
+article li {
+    margin-top: calc(var(--pad) / 2);
+    margin-bottom: calc(var(--pad) / 2);
+    margin-left: calc(var(--pad) * 2);
+}
+
+.list-item {
+    margin: var(--pad) 0;
+    font-weight: bold;
+    font-size: 2.4rem;
+    list-style-type: none;
+}
+
+code {
+    color: var(--code);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+}
+
+code .kw {
+    font-weight: 700;
+    color: var(--kw);
+}
+
+code .li {
+    color: var(--li);
+}
+
+code .ty {
+    color: var(--ty);
+}
+
+code .ge {
+    color: var(--ge);
+}
+
+code .id {
+    color: var(--id);
+}
+
+code .mc {
+    color: var(--mc);
+}
+
+code .lt {
+    color: var(--lt);
+}
+
+code .cm {
+    color: var(--cm);
+}
+
+.inline {
+    padding: 0 4px;
+    background: var(--bgcode);
+    border-radius: var(--border);
+}
+
+a {
+    color: var(--li);
+    text-decoration: none;
+}
+
+a .inline {
+    color: var(--li);
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+footer {
+    margin: var(--pad) 0;
+    padding-bottom: var(--pad);
+}
+
+footer .socials {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    align-items: center;
+}
+
+footer .icon {
+    padding: 1.5rem;
+}
+
+footer .icon svg {
+    width: 40px;
+    height: 40px;
+    fill: var(--fg);
+    transition: fill 0.2s ease;
+}
+
+footer .icon:hover svg {
+    fill: var(--li);
+}
