@@ -1,15 +1,106 @@
-<!DOCTYPE html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#282726"><link rel="icon" href="../favicon.svg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&amp;family=Carlito:ital,wght@0,400;0,700;1,400;1,700&amp;family=JetBrains+Mono:wght@100..800&amp;display=swap" rel="stylesheet"><link rel="stylesheet" href="../style.css"><title>Blog Opening!</title></head><body><style>.deferred {
-    opacity: 0;
+<!DOCTYPE html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#282726"><link rel="icon" href="../favicon.svg"><link rel="stylesheet" href="../style.css"><title>Blog Opening!</title></head><body><style>/*
+Inline from
+https://fonts.googleapis.com/css2?family=Alfa%20Slab%20One&family=Carlito:ital,wght@0,400;0,700;1,400;1,700&family=JetBrains%20Mono:wght@100..800&display=swap
+*/
+
+/* latin */
+@font-face {
+    font-family: 'Alfa Slab One';
+    font-style: normal;
+    font-weight: 400;
+    src: url(../alfaslab-n-la.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-.show {
-    transition: opacity 0.2s ease;
-}</style><script>window.onload = () => {
-    for (const el of document.querySelectorAll('.deferred')) {
-        el.classList.remove('deferred')
-    }
+/* cyrillic */
+@font-face {
+    font-family: 'Carlito';
+    font-style: italic;
+    font-weight: 400;
+    src: url(../carlito-i-cy.woff2) format('woff2');
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
-</script><header class="content deferred show"><div class="blog-title">Nano Memories</div><div class="hor"><div class="date">17 jul 2025<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9,10H7V12H9V10M13,10H11V12H13V10M17,10H15V12H17V10M19,3H18V1H16V3H8V1H6V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19Z" /></svg></div><div class="hor"><a class="hor button" href="../en.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 3V18H12V3H9M12 5L16 18L19 17L15 4L12 5M5 5V18H8V5H5M3 19V21H21V19H3Z" /></svg>articles</a><a class="hor button" href="../ru/hello_blog.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" /></svg>ru</a></div></div><h1 class="title">Blog Opening!</h1></header><article class="content deferred show"><p>The time has come - I'm officially launching my blog 🎉</p><p>In this opening article, I'll share how the blog was built. In short, I wrote a small utility called <a href="https://github.com/nanoqsh/milky" target="_blank"><code class="inline">milky</code></a>. It's just a basic HTML generator from markdown format. If you're curious, the source code is open and available in the linked repository</p><h2>What will the blog be about?</h2><p>Mainly programming, primarily in <a href="https://www.rust-lang.org/" target="_blank">Rust</a> 🦀</p><p>I have a few topics in mind, but I'd be happy if anyone suggests something they'd like to read about</p><h2>What language will the blog be in?</h2><p>I spent a while thinking about what language to use. On the one hand, writing in English makes sense to reach a wider audience. On the other, I really want to help grow the local Russian-speaking community. Moreover, a lot of content would need to be translated anyway - so why not make both languages available from the start? In the future, maybe more languages could be added if someone helps with translations. The generator is designed from the start to support any number of translations for a single article 🥰</p><p>Thanks, that's the end of the announcement! To avoid publishing an empty blog, I've also written a full <a href="./min_traits.html" target="_blank">article about trait bounds</a>. I'll follow up for anyone interested in the technical details of the implementation</p><h2>How it works</h2><p>Let's talk briefly about the implementation. Naturally, the whole generator is written in Rust. It produces simple static HTML pages, with no extra bells and whistles. The visual design was made and styled from scratch (sometimes sloppily 😗).</p><p>The generator is intentionally minimalist and includes only essential dependencies:</p><ul><li><code class="inline">maud</code> - HTML templating</li><li><code class="inline">pulldown-cmark</code> - markdown parser</li><li><code class="inline">serde</code> - serialization</li><li><code class="inline">syn</code> - basic Rust code parsing</li><li><code class="inline">time</code> - to set article publication dates</li><li><code class="inline">toml</code> - used for configuration and metadata</li></ul><p>It's interesting that Rust is often labeled a &quot;systems&quot; language, for writing complex performance-critical software. But is it a good fit for something high-level and simple, like a blog page generator? Well, the <a href="https://github.com/nanoqsh/milky" target="_blank">source code</a> is open - you can decide for yourself how true that assumption is</p><p>Sure, the project uses <em>a lot</em> of lifetimes. Just look at this data structure used to generate a page:</p><pre><code><span class="kw">pub</span> <span class="kw">struct</span> <span class="ty">Make</span>&lt;<span class="lt">'art</span>&gt; {
+
+/* latin */
+@font-face {
+    font-family: 'Carlito';
+    font-style: italic;
+    font-weight: 400;
+    src: url(../carlito-i-la.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* cyrillic */
+@font-face {
+    font-family: 'Carlito';
+    font-style: italic;
+    font-weight: 700;
+    src: url(../carlito-i-cy-700.woff2) format('woff2');
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+/* latin */
+@font-face {
+    font-family: 'Carlito';
+    font-style: italic;
+    font-weight: 700;
+    src: url(../carlito-i-la-700.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* cyrillic */
+@font-face {
+    font-family: 'Carlito';
+    font-style: normal;
+    font-weight: 400;
+    src: url(../carlito-n-cy.woff2) format('woff2');
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+/* latin */
+@font-face {
+    font-family: 'Carlito';
+    font-style: normal;
+    font-weight: 400;
+    src: url(../carlito-n-la.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* cyrillic */
+@font-face {
+    font-family: 'Carlito';
+    font-style: normal;
+    font-weight: 700;
+    src: url(../carlito-n-cy-700.woff2) format('woff2');
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+/* latin */
+@font-face {
+    font-family: 'Carlito';
+    font-style: normal;
+    font-weight: 700;
+    src: url(../carlito-n-la-700.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* cyrillic */
+@font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 100 800;
+    src: url(../jetbrains-m-cy.woff2) format('woff2');
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+/* latin */
+@font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 100 800;
+    src: url(../jetbrains-m-la.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}</style><header class="content"><div class="blog-title">Nano Memories</div><div class="hor"><div class="date">17 jul 2025<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9,10H7V12H9V10M13,10H11V12H13V10M17,10H15V12H17V10M19,3H18V1H16V3H8V1H6V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19Z" /></svg></div><div class="hor"><a class="hor button" href="../en.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 3V18H12V3H9M12 5L16 18L19 17L15 4L12 5M5 5V18H8V5H5M3 19V21H21V19H3Z" /></svg>articles</a><a class="hor button" href="../ru/hello_blog.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" /></svg>ru</a></div></div><h1 class="title">Blog Opening!</h1></header><article class="content"><p>The time has come - I'm officially launching my blog 🎉</p><p>In this opening article, I'll share how the blog was built. In short, I wrote a small utility called <a href="https://github.com/nanoqsh/milky" target="_blank"><code class="inline">milky</code></a>. It's just a basic HTML generator from markdown format. If you're curious, the source code is open and available in the linked repository</p><h2>What will the blog be about?</h2><p>Mainly programming, primarily in <a href="https://www.rust-lang.org/" target="_blank">Rust</a> 🦀</p><p>I have a few topics in mind, but I'd be happy if anyone suggests something they'd like to read about</p><h2>What language will the blog be in?</h2><p>I spent a while thinking about what language to use. On the one hand, writing in English makes sense to reach a wider audience. On the other, I really want to help grow the local Russian-speaking community. Moreover, a lot of content would need to be translated anyway - so why not make both languages available from the start? In the future, maybe more languages could be added if someone helps with translations. The generator is designed from the start to support any number of translations for a single article 🥰</p><p>Thanks, that's the end of the announcement! To avoid publishing an empty blog, I've also written a full <a href="./min_traits.html" target="_blank">article about trait bounds</a>. I'll follow up for anyone interested in the technical details of the implementation</p><h2>How it works</h2><p>Let's talk briefly about the implementation. Naturally, the whole generator is written in Rust. It produces simple static HTML pages, with no extra bells and whistles. The visual design was made and styled from scratch (sometimes sloppily 😗).</p><p>The generator is intentionally minimalist and includes only essential dependencies:</p><ul><li><code class="inline">maud</code> - HTML templating</li><li><code class="inline">pulldown-cmark</code> - markdown parser</li><li><code class="inline">serde</code> - serialization</li><li><code class="inline">syn</code> - basic Rust code parsing</li><li><code class="inline">time</code> - to set article publication dates</li><li><code class="inline">toml</code> - used for configuration and metadata</li></ul><p>It's interesting that Rust is often labeled a &quot;systems&quot; language, for writing complex performance-critical software. But is it a good fit for something high-level and simple, like a blog page generator? Well, the <a href="https://github.com/nanoqsh/milky" target="_blank">source code</a> is open - you can decide for yourself how true that assumption is</p><p>Sure, the project uses <em>a lot</em> of lifetimes. Just look at this data structure used to generate a page:</p><pre><code><span class="kw">pub</span> <span class="kw">struct</span> <span class="ty">Make</span>&lt;<span class="lt">'art</span>&gt; {
     <span class="kw">pub</span> <span class="id">l</span>: <span class="ty">Localizer</span>&lt;<span class="lt">'art</span>&gt;,
     <span class="kw">pub</span> <span class="id">blog</span>: &amp;<span class="lt">'art</span> <span class="ty">str</span>,
     <span class="kw">pub</span> <span class="id">title</span>: &amp;<span class="lt">'art</span> <span class="ty">str</span>,
@@ -39,4 +130,4 @@ en = { title = &quot;Blog Opening!&quot; }
 [[social]]
 href = &quot;https://github.com/nanoqsh&quot;
 icon = &quot;gh&quot;
-</code></pre><p>The toml files also define language localizations and store metadata</p><h2>Future plans</h2><p>Overall, I can say development was really fun. It's that kind of project where you start off writing a bit of code, then realize you need one more thing, then another, and another. Also, this is my first time writing anything even close to full-length articles ❤️</p><p>I already have a lot of improvements in mind, which I'll get to later. What kind of blog doesn't have tags, right? For now, I invite you to follow me on the socials I conveniently placed in the footer 🐾</p></article><footer class="deferred show"><div class="socials"><a class="icon" href="https://github.com/nanoqsh" aria-label="GitHub" target="_blank"><svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></a><a class="icon" href="https://discord.com/users/589014218498375680" aria-label="Discord" target="_blank"><svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Discord</title><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg></a><a class="icon" href="mailto:nanoqsh@gmail.com" aria-label="Email" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" /></svg></a></div></footer></body>
+</code></pre><p>The toml files also define language localizations and store metadata</p><h2>Future plans</h2><p>Overall, I can say development was really fun. It's that kind of project where you start off writing a bit of code, then realize you need one more thing, then another, and another. Also, this is my first time writing anything even close to full-length articles ❤️</p><p>I already have a lot of improvements in mind, which I'll get to later. What kind of blog doesn't have tags, right? For now, I invite you to follow me on the socials I conveniently placed in the footer 🐾</p></article><footer><div class="socials"><a class="icon" href="https://github.com/nanoqsh" aria-label="GitHub" target="_blank"><svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></a><a class="icon" href="https://discord.com/users/589014218498375680" aria-label="Discord" target="_blank"><svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Discord</title><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg></a><a class="icon" href="mailto:nanoqsh@gmail.com" aria-label="Email" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" /></svg></a></div></footer></body>
